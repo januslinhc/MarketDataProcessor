@@ -1,16 +1,14 @@
 package com.clsa.marketdata;
 
-import java.util.Deque;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MarketDataProcessor implements IMessageListener {
-    private final Map<String, MarketData> dataHeap = new ConcurrentHashMap<>();
-    private IRateLimiter rateLimiter = new RateLimiter(100);
-    private final Deque<String> updated = new ConcurrentLinkedDeque<>();
+    private final Map<String, Boolean> updated = new ConcurrentHashMap<>();
+    private final AtomicInteger count = new AtomicInteger(0);
 
     public MarketDataProcessor() {
         // publishing thread
@@ -19,20 +17,8 @@ public class MarketDataProcessor implements IMessageListener {
             while (true) {
                 try {
                     Thread.sleep(1000);
-                    if (!updated.isEmpty()) {
-                        int count = 0;
-                        String symbolToUpdate = updated.poll();
-                        while (symbolToUpdate != null) {
-                            count++;
-                            publishAggregatedMarketData(dataHeap.get(symbolToUpdate));
-                            if (count < 100) {
-                                symbolToUpdate = updated.poll();
-                            } else {
-                                symbolToUpdate = null;
-                            }
-                        }
-                        updated.clear();
-                    }
+                    updated.clear();
+                    count.set(0);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -47,10 +33,11 @@ public class MarketDataProcessor implements IMessageListener {
      */
     @Override
     public void onMessage(MarketData data) {
-        if (!updated.contains(data.getSymbol())) {
-            updated.add(data.getSymbol());
+        if (count.get() < 100 && !updated.getOrDefault(data.getSymbol(), false)) {
+            updated.put(data.getSymbol(), true);
+            count.incrementAndGet();
+            publishAggregatedMarketData(data);
         }
-        dataHeap.put(data.getSymbol(), data);
     }
 
     /**
