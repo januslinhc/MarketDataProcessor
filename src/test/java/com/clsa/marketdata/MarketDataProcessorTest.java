@@ -6,6 +6,9 @@ import org.junit.runner.RunWith;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.awaitility.Awaitility.await;
 
 class MarketDataProcessorTest {
     private final IMessageListener marketDataProcessor = new MarketDataProcessor() {
@@ -17,13 +20,16 @@ class MarketDataProcessorTest {
     };
 
     @Test
-    void onMessage() throws InterruptedException {
+    void onMessage() {
         final List<String> symbols = Arrays.asList("FB", "AMZN", "AAPL", "NFLX", "GOOG");
-        for (int i = 1; i <= 100; i++) {
-            for (int k = 0; k < symbols.size(); k++) {
-                marketDataProcessor.onMessage(MarketData.builder().symbol(symbols.get(k)).bid(i).ask(i).updateTime(LocalDateTime.now()).build());
-            }
-            Thread.sleep(100);
+        for (int i = 1; i <= 50; i++) {
+            int finalI = i;
+            await().atLeast(100, TimeUnit.MILLISECONDS).until(() -> {
+                for (String symbol : symbols) {
+                    marketDataProcessor.onMessage(MarketData.builder().symbol(symbol).bid(finalI).ask(finalI).updateTime(LocalDateTime.now()).build());
+                }
+                return true;
+            });
         }
     }
 }

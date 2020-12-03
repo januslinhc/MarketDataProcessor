@@ -25,6 +25,8 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.16'
 
     implementation "io.reactivex.rxjava3:rxjava:3.0.8"
+
+    testCompile group: 'org.awaitility', name: 'awaitility', version: '4.0.3'
 }
 
 sonarqube {
