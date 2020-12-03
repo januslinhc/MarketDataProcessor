@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
  * Market Data Message Class
  */
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class MarketData {
