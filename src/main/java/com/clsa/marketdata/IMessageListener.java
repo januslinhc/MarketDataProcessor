@@ -1,6 +1,6 @@
 package com.clsa.marketdata;
 
-public interface IMarketDataProcessor {
+public interface IMessageListener {
     /**
      * Receive incoming market data
      *

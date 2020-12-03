@@ -1,7 +1,5 @@
 package com.clsa.marketdata;
 
-import com.google.inject.Provides;
-
 public class RateLimiter implements IRateLimiter {
     private final int MAXTimesPerSecond;
     private long timeWindowStartTime = -1;

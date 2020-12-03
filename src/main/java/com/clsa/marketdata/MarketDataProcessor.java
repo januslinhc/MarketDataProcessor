@@ -1,18 +1,44 @@
 package com.clsa.marketdata;
 
-import com.google.inject.Inject;
-
-import java.time.LocalDateTime;
 import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class MarketDataProcessor implements IMarketDataProcessor {
-    private final HashMap<String, MarketData> dataHeap = new HashMap<>();
+public class MarketDataProcessor implements IMessageListener {
+    private final Map<String, MarketData> dataHeap = new ConcurrentHashMap<>();
     private IRateLimiter rateLimiter = new RateLimiter(100);
-    private Deque<String> updated = new LinkedList<>();
-    private com.google.common.util.concurrent.RateLimiter rateLimiter2 = com.google.common.util.concurrent.RateLimiter.create(100);
+    private final Deque<String> updated = new ConcurrentLinkedDeque<>();
+
+    public MarketDataProcessor() {
+        // publishing thread
+        ExecutorService executor = Executors.newFixedThreadPool(1);
+        executor.submit(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(1000);
+                    if (!updated.isEmpty()) {
+                        int count = 0;
+                        String symbolToUpdate = updated.poll();
+                        while (symbolToUpdate != null) {
+                            count++;
+                            publishAggregatedMarketData(dataHeap.get(symbolToUpdate));
+                            if (count < 100) {
+                                symbolToUpdate = updated.poll();
+                            } else {
+                                symbolToUpdate = null;
+                            }
+                        }
+                        updated.clear();
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
 
     /**
      * Receive incoming market data
@@ -21,26 +47,10 @@ public class MarketDataProcessor implements IMarketDataProcessor {
      */
     @Override
     public void onMessage(MarketData data) {
-        //System.out.println(data.getAsk());
-        rateLimiter.acquire();
         if (!updated.contains(data.getSymbol())) {
             updated.add(data.getSymbol());
-            publishAggregatedMarketData(data);
         }
         dataHeap.put(data.getSymbol(), data);
-        if (!updated.contains(data.getSymbol())) {
-            updated.add(data.getSymbol());
-        }
-        if (!rateLimiter2.tryAcquire()) {
-            rateLimiter2.acquire();
-            //System.out.println(updated.size());
-            System.out.println(LocalDateTime.now());
-            String symbol;
-            while (!updated.isEmpty()) {
-                symbol = updated.poll();
-                publishAggregatedMarketData(dataHeap.get(symbol));
-            }
-        }
     }
 
     /**
@@ -50,6 +60,5 @@ public class MarketDataProcessor implements IMarketDataProcessor {
      */
     public void publishAggregatedMarketData(MarketData data) {
         System.out.println(data);
-        // Do Nothing, assume implemented.
     }
 }
