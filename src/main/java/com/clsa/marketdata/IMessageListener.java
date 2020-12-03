@@ -2,9 +2,9 @@ package com.clsa.marketdata;
 
 public interface IMessageListener {
     /**
-     * Receive incoming market data
+     * Callback function for receiving incoming market data feed
      *
-     * @param data
+     * @param data Market data {@link MarketData}
      */
     void onMessage(MarketData data);
 }

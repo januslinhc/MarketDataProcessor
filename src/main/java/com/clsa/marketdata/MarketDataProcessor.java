@@ -1,51 +1,44 @@
 package com.clsa.marketdata;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
+import io.reactivex.rxjava3.subjects.PublishSubject;
 
+import java.util.concurrent.TimeUnit;
+
+/**
+ *
+ */
 public class MarketDataProcessor implements IMessageListener {
-    private final Map<String, Boolean> updated = new ConcurrentHashMap<>();
-    private final AtomicInteger count = new AtomicInteger(0);
+    private final PublishSubject<MarketData> dataFeed = PublishSubject.create();
 
     public MarketDataProcessor() {
-        // publishing thread
-        ExecutorService executor = Executors.newFixedThreadPool(1);
-        executor.submit(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(1000);
-                    updated.clear();
-                    count.set(0);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        dataFeed
+                // 1 second non-overlapping sliding window
+                .window(1, TimeUnit.SECONDS)
+                .subscribe(marketDataObservable -> marketDataObservable
+                        // find the first unique stock update entries
+                        .distinct(MarketData::getSymbol)
+                        // take the first 100 entries
+                        .take(100)
+                        // update
+                        .subscribe(this::publishAggregatedMarketData, Throwable::printStackTrace));
     }
 
     /**
-     * Receive incoming market data
+     * Callback function for receiving incoming market data feed
      *
-     * @param data
+     * @param data Market data {@link MarketData}
      */
     @Override
     public void onMessage(MarketData data) {
-        if (count.get() < 100 && !updated.getOrDefault(data.getSymbol(), false)) {
-            updated.put(data.getSymbol(), true);
-            count.incrementAndGet();
-            publishAggregatedMarketData(data);
-        }
+        dataFeed.onNext(data);
     }
 
     /**
      * Publish aggregated and throttled market data
      *
-     * @param data
+     * @param data Market data {@link MarketData}
      */
     public void publishAggregatedMarketData(MarketData data) {
-        System.out.println(data);
+        // Do nothing, assume implemented.
     }
 }

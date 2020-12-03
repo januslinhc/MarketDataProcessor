@@ -22,9 +22,5 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok:1.18.16'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.16'
 
-    // https://mvnrepository.com/artifact/com.google.guava/guava
-    compile group: 'com.google.guava', name: 'guava', version: '30.0-jre'
-
-    // https://mvnrepository.com/artifact/com.google.inject/guice
-    compile group: 'com.google.inject', name: 'guice', version: '4.2.3'
+    implementation "io.reactivex.rxjava3:rxjava:3.0.8"
 }

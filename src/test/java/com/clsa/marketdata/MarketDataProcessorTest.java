@@ -6,11 +6,15 @@ import org.junit.runner.RunWith;
 import java.time.LocalDateTime;
 
 class MarketDataProcessorTest {
-    //private IMessageListener marketDataProcessor = new MarketDataProcessor();
+    private final IMessageListener marketDataProcessor = new MarketDataProcessor() {
+        @Override
+        public void publishAggregatedMarketData(MarketData data) {
+            super.publishAggregatedMarketData(data);
+        }
+    };
 
     @Test
     void onMessage() {
-        IMessageListener marketDataProcessor = new MarketDataProcessor();
         for (int i = 0; i < 5000; i++) {
             MarketData marketData = MarketData.builder().symbol("HKT").bid(i).ask(i).updateTime(LocalDateTime.now()).build();
             marketDataProcessor.onMessage(marketData);
