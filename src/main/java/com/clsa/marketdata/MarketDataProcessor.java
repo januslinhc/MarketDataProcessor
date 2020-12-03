@@ -5,6 +5,7 @@ import io.reactivex.rxjava3.subjects.PublishSubject;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * A class that handling market data feed
  *
  */
 public class MarketDataProcessor implements IMessageListener {
@@ -30,7 +31,7 @@ public class MarketDataProcessor implements IMessageListener {
      */
     @Override
     public void onMessage(MarketData data) {
-        dataFeed.onNext(data);
+        dataFeed.onNext(data); // non-blocking
     }
 
     /**
