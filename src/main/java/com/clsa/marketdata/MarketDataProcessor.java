@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * A class that handling market data feed
- *
  */
 public class MarketDataProcessor implements IMessageListener {
     private final PublishSubject<MarketData> dataFeed = PublishSubject.create();
