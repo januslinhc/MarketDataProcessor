@@ -2,6 +2,10 @@
 
 [![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=januslinhc_MarketDataProcessor&metric=alert_status)](https://sonarcloud.io/dashboard?id=januslinhc_MarketDataProcessor) [![](https://github.com/januslinhc/MarketDataProcessor/workflows/build/badge.svg)](https://github.com/januslinhc/MarketDataProcessor)
 
+## Prerequisite
+
+- Java version 8/11/+
+
 ## Requirements
 
 - Ensure that the publishAggregatedMarketData method is not called any more than 100 times/sec where this period is a
