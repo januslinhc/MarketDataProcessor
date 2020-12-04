@@ -1,6 +1,7 @@
 package com.clsa.marketdata;
 
 import org.junit.Assert;
+import org.junit.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -48,6 +49,28 @@ class MarketDataProcessorTest {
         generateData(marketDataProcessor, inputSymbols, msSleepTimeForEachSymbolRecord, noOfUpdateEntriesForEachSymbol);
         inputSymbols.forEach(s -> {
             Assert.assertEquals(expectedNoOfPublishingForEachSymbol, publishCount.getOrDefault(s, 0).intValue());
+        });
+    }
+
+    // Ensure each symbol will always have the latest market data when it is published
+    @Test
+    void eachSymbolWillAlwaysHaveTheLatestMarketDataWhenItIsPublished() throws InterruptedException {
+        HashMap<String, MarketData> publishedEntry = new HashMap<>();
+        IMessageListener marketDataProcessor = new MarketDataProcessor() {
+            @Override
+            public void publishAggregatedMarketData(MarketData data) {
+                super.publishAggregatedMarketData(data);
+                publishedEntry.put(data.getSymbol(), data);
+            }
+        };
+        final int msSleepTimeForEachSymbolRecord = 100;
+        final int noOfUpdateEntriesForEachSymbol = 11;
+        List<String> inputSymbols = symbols.stream().limit(3).collect(Collectors.toList());
+        generateData(marketDataProcessor, inputSymbols, msSleepTimeForEachSymbolRecord, noOfUpdateEntriesForEachSymbol);
+        final double delta = 0.000001;
+        inputSymbols.forEach(s -> {
+            Assert.assertEquals(11, publishedEntry.get(s).getAsk(), delta);
+            Assert.assertEquals(11, publishedEntry.get(s).getBid(), delta);
         });
     }
 
