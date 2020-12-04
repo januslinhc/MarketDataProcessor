@@ -1,7 +1,8 @@
 package com.clsa.marketdata;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -82,5 +83,10 @@ class MarketDataProcessorTest {
             }
             Thread.sleep(sleepTimeForEachSymbolRecord);
         }
+    }
+
+    @Test
+    void testMarketDataDataObject() {
+        EqualsVerifier.simple().forClass(MarketData.class).verify();
     }
 }

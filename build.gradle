@@ -26,7 +26,7 @@ dependencies {
 
     implementation "io.reactivex.rxjava3:rxjava:3.0.8"
 
-    testCompile group: 'org.awaitility', name: 'awaitility', version: '4.0.3'
+    testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.5'
 }
 
 sonarqube {
