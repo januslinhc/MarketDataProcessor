@@ -17,12 +17,12 @@ public class MarketDataProcessor implements IMessageListener {
                 // 1 second non-overlapping sliding window
                 .buffer(1, TimeUnit.SECONDS)
                 .subscribe(marketDataObservable -> {
-                    // I use Map to group all market data received within 1 sliding window by the symbol String
-                    // the best case of time complexity to update symbol record is O(1) in case there is no hash value collision
+                    // I use Map to group all market data received within 1 sec sliding window by the symbol String
+                    // the best case of time complexity to update symbol record in the Hashamap is O(1) in case there is no hash value collision
                     Map<String, MarketData> storage = new HashMap<>();
                     marketDataObservable
                             // I need to keep the order, so we use non-parallel forEach
-                            // it is thread-safe and therefore I use HashMap
+                            // Because it's not concurrent and therefore I use HashMap (given that it is not thread safe
                             .forEach(marketData -> {
                                 // only capture the first 100 symbols of their market data within the 1sec time-window
                                 if (storage.containsKey(marketData.getSymbol()) || storage.keySet().size() < MAX_NO_OF_SYMBOLS_UPDATE_PER_TIMEWINDOW) {
