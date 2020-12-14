@@ -22,7 +22,7 @@ public class MarketDataProcessor implements IMessageListener {
                     Map<String, MarketData> storage = new HashMap<>();
                     marketDataObservable
                             // I need to keep the order, so we use non-parallel forEach
-                            // Because it's not concurrent and therefore I use HashMap (given that it is not thread safe
+                            // Because it's not concurrent and therefore I use HashMap (although it is not thread safe
                             .forEach(marketData -> {
                                 // only capture the first 100 symbols of their market data within the 1sec time-window
                                 if (storage.containsKey(marketData.getSymbol()) || storage.keySet().size() < MAX_NO_OF_SYMBOLS_UPDATE_PER_TIMEWINDOW) {
