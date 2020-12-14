@@ -29,10 +29,8 @@ public class MarketDataProcessor implements IMessageListener {
                                     storage.put(marketData.getSymbol(), marketData);
                                 }
                             });
-                    // publish the first 100 latest data within the 1sec time-window
-                    storage.keySet().forEach(s -> {
-                        publishAggregatedMarketData(storage.get(s));
-                    });
+                    // publish the latest data of first 100 symbols within the 1sec time-window
+                    storage.keySet().forEach(s -> publishAggregatedMarketData(storage.get(s)));
                 });
     }
 
