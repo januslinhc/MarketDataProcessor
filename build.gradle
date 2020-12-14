@@ -27,6 +27,9 @@ dependencies {
     implementation "io.reactivex.rxjava3:rxjava:3.0.8"
 
     testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.5'
+
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
 }
 
 sonarqube {

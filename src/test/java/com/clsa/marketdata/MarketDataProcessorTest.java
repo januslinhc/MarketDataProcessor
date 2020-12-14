@@ -1,5 +1,6 @@
 package com.clsa.marketdata;
 
+import lombok.extern.log4j.Log4j2;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,7 @@ class MarketDataProcessorTest {
 
     //  Ensure that the publishAggregatedMarketData method is not called any more than 100 times/sec where this period is a sliding window.
     @ParameterizedTest(name = "when {0} symbols with {1} update entries each and each symbol update received per 100MS, {2} publishing in total is expected")
-    @CsvSource({"100,10,100", "101,10,100", "100,11,200", "101,11,200"})
+    @CsvSource({"100,10,100", "101,10,100", "100,11,100", "101,11,100"})
     void publishAggregatedMarketDataMethodIsNotCalledAnyMoreThan100TimesPerSec(int noOfSymbols, int noOfSymbolRecords, int expectedTotalPublish) throws InterruptedException {
         List<MarketData> publishedEntries = new ArrayList<>();
         IMessageListener marketDataProcessor = new MarketDataProcessor() {
@@ -35,7 +36,7 @@ class MarketDataProcessorTest {
 
     // Ensure each symbol will not have more than one update per second
     @ParameterizedTest(name = "when 3 symbols with {0} update entries each and each symbol update received per 100MS, {1} update entries publishing for each symbol is expected")
-    @CsvSource({"0,0", "5,1", "11,2"})
+    @CsvSource({"0,0", "5,0", "10,1", "11,1"})
     void eachSymbolWillNotHaveMoreThanOneUpdatePerSecond(int noOfUpdateEntriesForEachSymbol, int expectedNoOfPublishingForEachSymbol) throws InterruptedException {
         HashMap<String, Integer> publishCount = new HashMap<>();
         IMessageListener marketDataProcessor = new MarketDataProcessor() {
@@ -65,13 +66,13 @@ class MarketDataProcessorTest {
             }
         };
         final int msSleepTimeForEachSymbolRecord = 100;
-        final int noOfUpdateEntriesForEachSymbol = 11;
+        final int noOfUpdateEntriesForEachSymbol = 10;
         List<String> inputSymbols = symbols.stream().limit(3).collect(Collectors.toList());
         generateData(marketDataProcessor, inputSymbols, msSleepTimeForEachSymbolRecord, noOfUpdateEntriesForEachSymbol);
         final double delta = 0.000001;
         inputSymbols.forEach(s -> {
-            Assert.assertEquals(11, publishedEntry.get(s).getAsk(), delta);
-            Assert.assertEquals(11, publishedEntry.get(s).getBid(), delta);
+            Assert.assertEquals(10, publishedEntry.get(s).getAsk(), delta);
+            Assert.assertEquals(10, publishedEntry.get(s).getBid(), delta);
         });
     }
 
